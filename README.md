@@ -47,6 +47,8 @@ Move the two files into secrets/traefik
 
 ## Start the compose
 
+Download this project and start the docker compose with the command below
+
 ```
 docker compose up -d
 ```
@@ -60,11 +62,7 @@ c055f448a399   opensearchproject/opensearch:2.11.0   "./opensearch-docker…"   
 162fa8f6b746   mongo:6.0.11                          "docker-entrypoint.s…"   2 weeks ago   Up 2 weeks            27017/tcp        graylog-mongo-1
 ```
 
-
-
-
-
-
+You can now access your Graylog instance !
 
 
 
