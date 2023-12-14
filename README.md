@@ -43,7 +43,7 @@ openssl x509 -req -in graylog.lab.lan.csr -signkey graylog.lab.lan.key -out gray
 ```
 
 
-Move the two files into secrets/
+Move the two files into secrets/traefik
 
 ## Start the compose
 
