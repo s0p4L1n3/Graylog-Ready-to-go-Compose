@@ -20,7 +20,7 @@ secrets:
 
 services:
   reverse-proxy:
-    image: traefik:2.10.7
+    image: traefik:2.11.3
     command:
       - --providers.file.directory=/config
       - --providers.docker
@@ -41,14 +41,14 @@ services:
         target: /certs/graylog.lab.lan.key
 
   mongo:
-    image: mongo:6.0.11
+    image: mongo:6.0.14
     volumes:
       - mongo_data:/data/db
     networks:
       - graylog
 
   opensearch:
-    image: opensearchproject/opensearch:2.11.0
+    image: opensearchproject/opensearch:2.14.0
     volumes:
       - es_data:/usr/share/opensearch/data
     ports:
@@ -60,6 +60,7 @@ services:
       - "action.auto_create_index=false"
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=PassIsStrongForThisProject&"
     ulimits:
       memlock:
         soft: -1
@@ -72,7 +73,7 @@ services:
 
   
   graylog:
-    image: graylog/graylog:5.2.2
+    image: graylog/graylog:6.0.2
     volumes:
       - graylog_data:/usr/share/graylog/data
       - ./csv:/srv
