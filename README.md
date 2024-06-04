@@ -64,8 +64,15 @@ CONTAINER ID   IMAGE                                 COMMAND                  CR
 
 You can now access your Graylog instance from: https://graylog.lab.lan !
 
+You can go further with Content Pack i've made for you !
 
+## Windows Security
+https://github.com/s0p4L1n3/Graylog_Content_Pack_Windows_Security
+## VCEnter / ESXI v8 Security
+https://github.com/s0p4L1n3/Graylog_Content_Pack_VMWare-8.X-forVCSA-ESXI
 
+## Stormshield SNS Firewall
+https://github.com/s0p4L1n3/Graylog_Content_Pack_Stormshield_Firewall
 
 
 
