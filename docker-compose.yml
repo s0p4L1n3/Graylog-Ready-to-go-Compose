@@ -1,5 +1,3 @@
-version: '3'
-
 networks:
   graylog:
     driver: bridge
@@ -12,43 +10,17 @@ volumes:
   graylog_data:
     driver: local
 
-secrets:
-  traefik.certificate:
-    file: ./secrets/traefik/graylog.lab.lan.crt
-  traefik.key:
-    file: ./secrets/traefik/graylog.lab.lan.key
-
-services:
-  reverse-proxy:
-    image: traefik:2.11.3
-    command:
-      - --providers.file.directory=/config
-      - --providers.docker
-      - --entryPoints.web.address=:80
-      - --entryPoints.https.address=:443
-      - --entrypoints.https.http.tls=true
-    networks:
-      - graylog
-    ports:
-      - 443:443/tcp
-    volumes:
-      - /var/run/docker.sock:/var/run/docker.sock
-      - ./config/traefik:/config:ro
-    secrets:
-      - source: traefik.certificate
-        target: /certs/graylog.lab.lan.crt
-      - source: traefik.key
-        target: /certs/graylog.lab.lan.key
-
   mongo:
-    image: mongo:6.0.14
+    image: mongo:7.0.14
+    hostname: mongodb
     volumes:
       - mongo_data:/data/db
     networks:
       - graylog
 
   opensearch:
-    image: opensearchproject/opensearch:2.14.0
+    image: opensearchproject/opensearch:2.15.0
+    hostname: opensearch
     volumes:
       - es_data:/usr/share/opensearch/data
     ports:
@@ -60,6 +32,8 @@ services:
       - "action.auto_create_index=false"
       - "plugins.security.ssl.http.enabled=false"
       - "plugins.security.disabled=true"
+      # Can generate a password for `OPENSEARCH_INITIAL_ADMIN_PASSWORD` using a linux device via
+      # tr -dc A-Z-a-z-0-9_@#%^-_=+  devurandom  head -c${1-32}
       - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=PassIsStrongForThisProject&"
     ulimits:
       memlock:
@@ -73,7 +47,8 @@ services:
 
   
   graylog:
-    image: graylog/graylog:6.0.2
+    image: graylog/graylog:6.1.1
+    hostname: graylog-1
     volumes:
       - graylog_data:/usr/share/graylog/data
       - ./csv:/srv
@@ -84,10 +59,11 @@ services:
       GRAYLOG_ROOT_PASSWORD_SHA2: e9052e72e4c6780e291912e108dbd79e33812e7c64440e789b915afef2feab3b
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
       GRAYLOG_HTTP_EXTERNAL_URI: "https://graylog.lab.lan/"
-
+      GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
     labels:
     # inform traefik to serve this service
       - "traefik.enable=true"
+      - "traefik.http.routers.graylog.ruleSyntax=v3"
       - "traefik.http.routers.graylog.rule=Host(`graylog.lab.lan`)"
       - "traefik.http.routers.graylog.service=graylog"
       - "traefik.http.routers.graylog.entrypoints=https"
@@ -95,7 +71,6 @@ services:
       - "traefik.http.routers.graylog.middlewares=graylog-header"
       - "traefik.http.middlewares.graylog-header.headers.customrequestheaders.X-Graylog-Server-URL=http://graylog.lab.lan/"
       - "traefik.docker.network=graylog"
-    
     entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 --  /docker-entrypoint.sh
     networks:
       - graylog
@@ -110,7 +85,3 @@ services:
       - 1514:1514/udp
       # Beats
       - 5044:5044/tcp
-      # GELF UDP
-      - 12201:12201/udp
-      # GELF TCP
-      - 12202:12202/tcp
