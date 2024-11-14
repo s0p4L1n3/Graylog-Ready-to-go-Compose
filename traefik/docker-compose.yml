@@ -15,8 +15,8 @@ services:
       - --providers.file.directory=/config
       - --providers.docker
       - --entryPoints.web.address=:80
-      - --entryPoints.https.address=:443
-      - --entrypoints.https.http.tls=true
+      - --entryPoints.websecure.address=:443
+      - --entrypoints.websecure.http.tls=true
     networks:
       - graylog
     ports:

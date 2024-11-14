@@ -1,6 +1,8 @@
 networks:
   graylog:
     external: true
+  traefik-tls:
+    external: true
 
 volumes:
   mongo_data:
@@ -19,6 +21,7 @@ services:
       - mongo_data:/data/db
     networks:
       - graylog
+      - traefik-tls
 
   opensearch:
     image: opensearchproject/opensearch:2.15.0
@@ -46,6 +49,7 @@ services:
         hard: 65536
     networks:
       - graylog
+      - traefik-tls
 
   
   graylog:
@@ -68,14 +72,15 @@ services:
       - "traefik.http.routers.graylog.ruleSyntax=v3"
       - "traefik.http.routers.graylog.rule=Host(`graylog.sopaline.lan`)"
       - "traefik.http.routers.graylog.service=graylog"
-      - "traefik.http.routers.graylog.entrypoints=https"
+      - "traefik.http.routers.graylog.entrypoints=websecure"
       - "traefik.http.services.graylog.loadbalancer.server.port=9000"
       - "traefik.http.routers.graylog.middlewares=graylog-header"
       - "traefik.http.middlewares.graylog-header.headers.customrequestheaders.X-Graylog-Server-URL=http://graylog.sopaline.lan/"
-      - "traefik.docker.network=graylog"
+      - "traefik.docker.network=traefik-tls"
     entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 --  /docker-entrypoint.sh
     networks:
       - graylog
+      - traefik-tls
     restart: always
     depends_on:
       - mongo
