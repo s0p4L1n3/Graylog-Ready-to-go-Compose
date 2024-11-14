@@ -1,6 +1,6 @@
 networks:
   graylog:
-    driver: bridge
+    external: true
 
 volumes:
   mongo_data:
@@ -9,6 +9,8 @@ volumes:
     driver: local
   graylog_data:
     driver: local
+
+services:
 
   mongo:
     image: mongo:7.0.14
@@ -34,7 +36,7 @@ volumes:
       - "plugins.security.disabled=true"
       # Can generate a password for `OPENSEARCH_INITIAL_ADMIN_PASSWORD` using a linux device via
       # tr -dc A-Z-a-z-0-9_@#%^-_=+  devurandom  head -c${1-32}
-      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=PassIsStrongForThisProject&"
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=Chocolate1-Strawberry-Opacity-Lemon"
     ulimits:
       memlock:
         soft: -1
@@ -47,7 +49,7 @@ volumes:
 
   
   graylog:
-    image: graylog/graylog:6.1.1
+    image: graylog/graylog:6.1.2
     hostname: graylog-1
     volumes:
       - graylog_data:/usr/share/graylog/data
@@ -56,20 +58,20 @@ volumes:
     # CHANGE ME (must be at least 16 characters)!
       GRAYLOG_PASSWORD_SECRET: somepasswordpepper
     # To change password: echo -n "Enter Password: " && head -1 < /dev/stdin | tr -d '\n' | sha256sum | cut -d " " -f1
-      GRAYLOG_ROOT_PASSWORD_SHA2: e9052e72e4c6780e291912e108dbd79e33812e7c64440e789b915afef2feab3b
+      GRAYLOG_ROOT_PASSWORD_SHA2: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
-      GRAYLOG_HTTP_EXTERNAL_URI: "https://graylog.lab.lan/"
+      GRAYLOG_HTTP_EXTERNAL_URI: "https://graylog.sopaline.lan/"
       GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
     labels:
     # inform traefik to serve this service
       - "traefik.enable=true"
       - "traefik.http.routers.graylog.ruleSyntax=v3"
-      - "traefik.http.routers.graylog.rule=Host(`graylog.lab.lan`)"
+      - "traefik.http.routers.graylog.rule=Host(`graylog.sopaline.lan`)"
       - "traefik.http.routers.graylog.service=graylog"
       - "traefik.http.routers.graylog.entrypoints=https"
       - "traefik.http.services.graylog.loadbalancer.server.port=9000"
       - "traefik.http.routers.graylog.middlewares=graylog-header"
-      - "traefik.http.middlewares.graylog-header.headers.customrequestheaders.X-Graylog-Server-URL=http://graylog.lab.lan/"
+      - "traefik.http.middlewares.graylog-header.headers.customrequestheaders.X-Graylog-Server-URL=http://graylog.sopaline.lan/"
       - "traefik.docker.network=graylog"
     entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 --  /docker-entrypoint.sh
     networks:

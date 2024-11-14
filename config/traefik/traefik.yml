@@ -1,4 +1,0 @@
-tls:
-  certificates:
-    - certFile: /certs/graylog.lab.lan.crt
-      keyFile: /certs/graylog.lab.lan.key
