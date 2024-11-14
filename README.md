@@ -1,5 +1,7 @@
 # Graylog Project with Docker Compose behind Traefik Reverse Proxy for TLS
 
+This use case is when you want to test Graylog localy
+
 ### Initial Step
 
 Self-signed certificate without SAN (Subject Alternative Name) is not valid anymore. 
