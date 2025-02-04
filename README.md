@@ -44,24 +44,22 @@ openssl x509 -req -in graylog.sopaline.lan.csr -signkey graylog.sopaline.lan.key
 
 Move the two files into traefik/secrets/traefik
 
-## Create a bridge network for graylog/traefik
+## 1 Create a bridge networks for graylog/traefik
 ```
 docker network create -d bridge graylog
+docker network create -d bridge traefik-tls
 ```
 
-## Start the compose for traefik
-
-Download this project and start the docker compose with the command below
-
+## 2 Clone the traefik docker compose project, to start it up before graylog stack.
 ```
-cd traefik
-docker compose up -d
+git clone https://github.com/s0p4L1n3/traefik-tls.git
+cd traefik-tls && docker compose up -d
 ```
 
-## Start the compose for graylog and its components
+## 3 Start the compose for graylog and its components
 
 ```
-cd graylog
+cd ../Graylog-Ready-to-go-Compose/graylog
 docker compose up -d
 ```
 
