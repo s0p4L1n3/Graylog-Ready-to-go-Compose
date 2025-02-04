@@ -1,0 +1,118 @@
+networks:
+  graylog:
+    external: true
+  traefik-tls:
+    external: true
+
+volumes:
+  mongo_data:
+    driver: local
+  es_data:
+    driver: local
+  graylog_data:
+    driver: local
+  graylog_datanode:
+    driver: local
+
+services:
+
+  mongo:
+    image: mongo:7.0.14
+    hostname: mongodb
+    volumes:
+      - mongo_data:/data/db
+    networks:
+      - graylog
+      - traefik-tls
+    restart: always
+
+  opensearch:
+    image: opensearchproject/opensearch:2.15.0
+    hostname: opensearch
+    volumes:
+      - es_data:/usr/share/opensearch/data
+    ports:
+      - 9200:9200/tcp
+    environment:
+      - "discovery.type=single-node"
+      - "bootstrap.memory_lock=true"
+      - "OPENSEARCH_JAVA_OPTS=-Xms2g -Xmx2g"
+      - "action.auto_create_index=false"
+      - "plugins.security.ssl.http.enabled=false"
+      - "plugins.security.disabled=true"
+      # Can generate a password for `OPENSEARCH_INITIAL_ADMIN_PASSWORD` using a linux device via
+      # tr -dc A-Z-a-z-0-9_@#%^-_=+  devurandom  head -c${1-32}
+      - "OPENSEARCH_INITIAL_ADMIN_PASSWORD=Chocolate1-Strawberry-Opacity-Lemon"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - graylog
+      - traefik-tls
+    restart: always
+
+  datanode:
+    image: "graylog/graylog-datanode:6.1"
+    hostname: "datanode"
+    environment:
+      GRAYLOG_DATANODE_NODE_ID_FILE: "/var/lib/graylog-datanode/node-id"
+      GRAYLOG_DATANODE_PASSWORD_SECRET: "somepasswordpepper"
+      GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+      GRAYLOG_DATANODE_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - graylog
+    volumes:
+      - "graylog_datanode:/var/lib/graylog-datanode"
+
+  graylog:
+    image: graylog/graylog:6.1.5
+    hostname: graylog-1
+    volumes:
+      - graylog_data:/usr/share/graylog/data
+      - ./csv:/srv
+    environment:
+    # CHANGE ME (must be at least 16 characters)!
+      GRAYLOG_PASSWORD_SECRET: somepasswordpepper
+    # To change password: echo -n "Enter Password: " && head -1 < /dev/stdin | tr -d '\n' | sha256sum | cut -d " " -f1
+      GRAYLOG_ROOT_PASSWORD_SHA2: 8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918
+      #GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
+      GRAYLOG_HTTP_EXTERNAL_URI: "https://graylog.sopaline.lan/"
+      GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+    labels:
+    # inform traefik to serve this service
+      - "traefik.enable=true"
+      - "traefik.http.routers.graylog.ruleSyntax=v3"
+      - "traefik.http.routers.graylog.rule=Host(`graylog.sopaline.lan`)"
+      - "traefik.http.routers.graylog.service=graylog"
+      - "traefik.http.routers.graylog.entrypoints=websecure"
+      - "traefik.http.services.graylog.loadbalancer.server.port=9000"
+      - "traefik.http.routers.graylog.middlewares=graylog-header"
+      - "traefik.http.middlewares.graylog-header.headers.customrequestheaders.X-Graylog-Server-URL=http://graylog.sopaline.lan/"
+      - "traefik.docker.network=traefik-tls"
+    #entrypoint: /usr/bin/tini -- wait-for-it opensearch:9200 --  /docker-entrypoint.sh
+    entrypoint: "/usr/bin/tini -- /docker-entrypoint.sh"
+    networks:
+      - graylog
+      - traefik-tls
+    restart: always
+    depends_on:
+      - mongo
+      - opensearch
+    ports:
+      # Syslog TCP
+      - 1514:1514/tcp
+      # Syslog UDP
+      - 1514:1514/udp
+      # Beats
+      - 5044:5044/tcp
