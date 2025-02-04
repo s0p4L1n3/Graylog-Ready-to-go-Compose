@@ -53,7 +53,7 @@ services:
 
   
   graylog:
-    image: graylog/graylog:6.1.2
+    image: graylog/graylog:6.1.5
     hostname: graylog-1
     volumes:
       - graylog_data:/usr/share/graylog/data
