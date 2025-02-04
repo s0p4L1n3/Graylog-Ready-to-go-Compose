@@ -1,7 +1,0 @@
-core:
-  defaultRuleSyntax: v3
-
-tls:
-  certificates:
-    - certFile: /certs/graylog.sopaline.lan.crt
-      keyFile: /certs/graylog.sopaline.lan.key
