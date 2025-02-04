@@ -2,7 +2,7 @@
 
 This use case is when you want to test Graylog localy
 
-### Initial Step
+### Initial Step (only required if you want to generate your own certs)
 
 Self-signed certificate without SAN (Subject Alternative Name) is not valid anymore. 
 You will need to generate one for graylog to access it securely.
@@ -56,17 +56,18 @@ git clone https://github.com/s0p4L1n3/traefik-tls.git
 cd traefik-tls && docker compose up -d
 ```
 
-## 3 Start the compose for graylog and its components
+## 3 Clone the project and start the compose for graylog and its components
 
 ```
-cd ../Graylog-Ready-to-go-Compose/graylog
+cd .. && git clone https://github.com/s0p4L1n3/Graylog-Ready-to-go-Compose.git
+cd Graylog-Ready-to-go-Compose/graylog
 docker compose up -d
 ```
 
 `docker ps` to display status
 ```
 CONTAINER ID   IMAGE                                 COMMAND                  CREATED             STATUS                       PORTS                                                                                                                                                                                                                                                                                                    NAMES
-663c70777656   graylog/graylog:6.1.2                 "/usr/bin/tini -- wa…"   About an hour ago   Up About an hour (healthy)   0.0.0.0:1514->1514/udp, :::1514->1514/udp, 0.0.0.0:1514-1515->1514-1515/tcp, :::1514-1515->1514-1515/tcp, 0.0.0.0:1518->1518/udp, :::1518->1518/udp, 0.0.0.0:5044->5044/tcp, :::5044->5044/tcp, 0.0.0.0:12202->12202/tcp, 0.0.0.0:12201->12201/udp, :::12202->12202/tcp, :::12201->12201/udp, 9000/tcp   graylog-graylog-1
+663c70777656   graylog/graylog:6.1.5                 "/usr/bin/tini -- wa…"   About an hour ago   Up About an hour (healthy)   0.0.0.0:1514->1514/udp, :::1514->1514/udp, 0.0.0.0:1514-1515->1514-1515/tcp, :::1514-1515->1514-1515/tcp, 0.0.0.0:1518->1518/udp, :::1518->1518/udp, 0.0.0.0:5044->5044/tcp, :::5044->5044/tcp, 0.0.0.0:12202->12202/tcp, 0.0.0.0:12201->12201/udp, :::12202->12202/tcp, :::12201->12201/udp, 9000/tcp   graylog-graylog-1
 398e4457743d   opensearchproject/opensearch:2.15.0   "./opensearch-docker…"   About an hour ago   Up About an hour             9300/tcp, 9600/tcp, 0.0.0.0:9200->9200/tcp, :::9200->9200/tcp, 9650/tcp                                                                                                                                                                                                                                  graylog-opensearch-1
 46f2df5746f4   traefik:3.2.0                        "/entrypoint.sh --pr…"   2 hours ago         Up 2 hours                   80/tcp, 0.0.0.0:443->443/tcp, :::443->443/tcp                                                                                                                                                                                                                                                            graylog-reverse-proxy-1
 67eb2ff8f2b1   mongo:7.0.14                          "docker-entrypoint.s…"   20 hours ago        Up 20 hours                  27017/tcp                                                                                                                                                                                                                                                                                                graylog-mongo-1
