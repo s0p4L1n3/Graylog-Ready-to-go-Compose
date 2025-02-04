@@ -76,6 +76,59 @@ CONTAINER ID   IMAGE                                 COMMAND                  CR
 You can now access your Graylog instance from: https://graylog.sopaline.lan !
 Default creds: admin / admin
 
+# Migration from Opensearch to Datanode
+
+Graylog released datanode docker image which is an Opensearch 2.15 fork. It is a seamless integration and the migration process is pretty straitforward.
+
+If you want to migrate Go to System > Data Node > Migration, follow the steps
+
+![image](https://github.com/user-attachments/assets/9aaf2ff0-838f-4ffb-aab3-4c63a35fcc72)
+
+In order to Graylog to detect the datanode, edit the docker-compose.yml and add the datanode service in the service code block of the yml file.
+Do not forget to declare the volume along with other one
+
+```
+graylog_datanode:
+    driver: local
+
+services:
+
+  datanode:
+    image: "graylog/graylog-datanode:6.1"
+    hostname: "datanode"
+    environment:
+      GRAYLOG_DATANODE_NODE_ID_FILE: "/var/lib/graylog-datanode/node-id"
+      GRAYLOG_DATANODE_PASSWORD_SECRET: "somepasswordpepper"
+      GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2: "8c6976e5b5410415bde908bd4dee15dfb167a9c873fc4bb8a81f6f2ab448a918"
+      GRAYLOG_DATANODE_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        soft: 65536
+        hard: 65536
+    networks:
+      - graylog
+    volumes:
+      - "graylog_datanode:/var/lib/graylog-datanode"
+```
+
+And `docker compose up -d`
+
+The datanode should be detected and Follow then the process.
+
+At the end, when Graylog display you should remove all reference to Opensearch, replace you docker-compose.yml file with this one: https://github.com/s0p4L1n3/Graylog-Ready-to-go-Compose/blob/main/graylog/docker-compose-datanode.yml
+rename it with the original file name `docker-compose.yml`.
+
+And `docker compose up -d`
+
+It should display like this after starting:
+
+![image](https://github.com/user-attachments/assets/babf9352-81f1-47f6-9202-5487a9d86a79)
+
+# Additionnal info
+
 You can go further with Content Pack i've made for you !
 
 ## Windows Security
