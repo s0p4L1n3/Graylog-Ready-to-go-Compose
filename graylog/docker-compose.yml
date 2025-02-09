@@ -66,6 +66,8 @@ services:
       GRAYLOG_ELASTICSEARCH_HOSTS: "http://opensearch:9200"
       GRAYLOG_HTTP_EXTERNAL_URI: "https://graylog.sopaline.lan/"
       GRAYLOG_MONGODB_URI: "mongodb://mongodb:27017/graylog"
+      TZ: "Europe/Paris"
+      GRAYLOG_ROOT_TIMEZONE: "Europe/Paris"
     labels:
     # inform traefik to serve this service
       - "traefik.enable=true"
